@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Roomradar - Login</title>
+    <style>
+        body {font-family: Arial; text-align: center; margin-top: 100px;}
+        .login-box {width:300px; margin: 0 auto;}
+        input {width:100%; padding: 10px; margin: 10px 0;}
+        button {padding:10px 20px; background: whitesmoke; border: none}
+    </style>
+</head>
+
+<body>
+    <h1>RoomRadar</h1>
+
+    <form method="post" class="login-box">
+        {% csrf_token %}
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+
+</body>
+</html>

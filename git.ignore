@@ -1,0 +1,23 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Database
+db.sqlite3
+*.sqlite3
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Mac stuff
+.DS_Store
+
+# PyCharm stuff
+.idea/
+
+# VSCode stuff
+.vscode/
