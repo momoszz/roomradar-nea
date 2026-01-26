@@ -7,6 +7,7 @@
         .login-box {width:300px; margin: 0 auto;}
         input {width:100%; padding: 10px; margin: 10px 0;}
         button {padding:10px 20px; background: whitesmoke; border: none}
+        .error {color: red; margin: 10px 0;}
     </style>
 </head>
 
@@ -15,10 +16,16 @@
 
     <form method="post" class="login-box">
         {% csrf_token %}
+
+        {% if messages %}
+            {% for message in messages %}
+                <p class="error">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+
         <input type="text" name="username" placeholder="Username" required>
         <input type="password" name="password" placeholder="Password" required>
         <button type="submit">Login</button>
     </form>
-
 </body>
 </html>

@@ -16,4 +16,4 @@ def loginView(request):
     return render(request, 'login.html')
 
 def dashboardView(request):
-    return render(request,'dashboard.html')
+    return render(request,'teacherDashboard.html')
