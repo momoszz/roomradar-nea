@@ -6,7 +6,7 @@ class Room(models.Model):
     capacity = models.IntegerField()
     hasProjector = models.BooleanField(default=False)
     hasComputers = models.BooleanField(default=False)
-    blockLocation = models.CharField(max_length=30)  # Renamed from buildingLocation
+    blockLocation = models.CharField(max_length=30)
 
     def __str__(self):
         return self.roomName
