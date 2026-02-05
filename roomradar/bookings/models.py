@@ -1,17 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
 class Room(models.Model):
     roomName = models.CharField(max_length=20, unique=True)
     capacity = models.IntegerField()
     hasProjector = models.BooleanField(default=False)
     hasComputers = models.BooleanField(default=False)
-    buildingLocation = models.CharField(max_length=30)
+    blockLocation = models.CharField(max_length=30)  # Renamed from buildingLocation
 
     def __str__(self):
         return self.roomName
-
 
 class Booking(models.Model):
     bookingID = models.AutoField(primary_key=True)
@@ -23,4 +21,4 @@ class Booking(models.Model):
     classSize = models.IntegerField()
 
     def __str__(self):
-        return f"{self.room.roomName} - Period {self.periodNumber}"
+        return f'{self.room.roomName} - Period {self.periodNumber}'
