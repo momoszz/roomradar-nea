@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-class Room(rooms.Model):
+class Room(models.Model):
     roomName = models.CharField(max_length=20, unique=True)
     capacity = models.IntegerField()
     hasProjector = models.BooleanField(default=False)
@@ -21,4 +21,4 @@ class Booking(models.Model):
     classSize = models.IntegerField()
 
     def __str__(self):
-        return f"{self.room} - Period {self.periodNumber}"
+        return f'{self.room} - Period {self.periodNumber}'
