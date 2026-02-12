@@ -2,13 +2,14 @@ from django import template
 
 register = template.Library()
 
-# Custom filter to lookup booking by (roomID, period, weekday) tuple key
+# custom filter to look up bookings using room id, period and day as a key
 @register.filter(name='get_booking')
 def getBooking(bookingDict, args):
-    """Looks up booking in dictionary using comma-separated args as tuple key"""
+    # takes comma separated values and turns them into a tuple for dictionary lookup
+    # returns the booking if it exists, otherwise returns none so the cell shows available
     try:
-        roomID, period, weekday = args.split(',')
-        key = (int(roomID), int(period), int(weekday))
+        roomId, period, weekday = args.split(',')
+        key = (int(roomId), int(period), int(weekday))
         return bookingDict.get(key, None)
     except (ValueError, AttributeError):
-        return None  # Returns None if lookup fails (cell will show as available)
+        return None
