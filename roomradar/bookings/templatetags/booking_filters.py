@@ -7,8 +7,8 @@ register = template.Library()
 def getBooking(bookingDict, args):
     """Looks up booking in dictionary using comma-separated args as tuple key"""
     try:
-        roomId, period, weekday = args.split(',')
-        key = (int(roomId), int(period), int(weekday))
+        roomID, period, weekday = args.split(',')
+        key = (int(roomID), int(period), int(weekday))
         return bookingDict.get(key, None)
     except (ValueError, AttributeError):
         return None  # Returns None if lookup fails (cell will show as available)
