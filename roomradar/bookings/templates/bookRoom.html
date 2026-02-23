@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Room - RoomRadar</title>
+    <style>
+        body {font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5;}
+        .form-container {background: white; padding: 30px; border-radius: 8px; max-width: 500px; margin: 40px auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+        h1 {margin-top: 0; color: #333;}
+        .room-info {margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee; color: #666;}
+        .form-group {margin-bottom: 15px;}
+        label {display: block; margin-bottom: 5px; font-weight: bold; color: #555;}
+        input[type='text'], input[type='number'] {width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;}
+        button {background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px;}
+        button:hover {background: #0056b3;}
+        .back-link {display: block; text-align: center; margin-top: 15px; color: #666; text-decoration: none;}
+        .error {color: #dc3545; font-size: 14px; margin-top: 5px;}
+    </style>
+</head>
+<body>
+    <div class='form-container'>
+        <h1>Book Room</h1>
+
+        <div class='room-info'>
+            <div><strong>Room:</strong> {{ room.roomName }}</div>
+            <div><strong>Date:</strong> {{ bookingDate|date:'l, d M Y' }}</div>
+            <div><strong>Period:</strong> {{ period }}</div>
+            <div><strong>Capacity:</strong> {{ room.capacity }}</div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class='error'>{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method='POST'>
+            {% csrf_token %}
+            <div class='form-group'>
+                <label for='subject'>Subject</label>
+                <input type='text' id='subject' name='subject' required>
+            </div>
+
+            <div class='form-group'>
+                <label for='classSize'>Class Size</label>
+                <input type='number' id='classSize' name='classSize' required min='1' max='{{ room.capacity }}'>
+            </div>
+
+            <button type='submit'>Confirm Booking</button>
+        </form>
+
+        <a href='{% url "teacherDashboard" %}' class='back-link'>Cancel</a>
+    </div>
+</body>
+</html>
