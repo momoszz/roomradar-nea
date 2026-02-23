@@ -19,7 +19,7 @@ class Booking(models.Model):
     teacher = models.ForeignKey(User, on_delete=models.CASCADE)  # links booking to teacher account
     bookingDate = models.DateField()
     periodNumber = models.IntegerField()  # 1-6 for school periods
-    subject = models.CharField(max_length=50)
+    className = models.CharField(max_length=50)  # renamed from subject for clarity
     classSize = models.IntegerField()  # used to check room capacity later
 
     def __str__(self):

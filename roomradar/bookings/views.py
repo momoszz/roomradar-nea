@@ -59,7 +59,14 @@ def teacherDashboard(request):
     for booking in allBookings:
         key = (booking.room.id, booking.periodNumber, booking.bookingDate.weekday())
         bookingLookup[key] = booking
-    
+
+    # get upcoming bookings for the sidebar
+    # filter by current user and dates from today onwards
+    upcomingBookings = Booking.objects.filter(
+        teacher=request.user,
+        bookingDate__gte=date.today()
+    ).order_by('bookingDate', 'periodNumber')
+
     # periods 1-6 for the school day
     periods = list(range(1, 7))
     # weekdays with their numbers so template can do lookups
@@ -83,7 +90,8 @@ def teacherDashboard(request):
         'weekEnd': weekEnd,
         'weekOffset': weekOffset,
         'prevOffset': weekOffset - 1,
-        'nextOffset': weekOffset + 1
+        'nextOffset': weekOffset + 1,
+        'upcomingBookings': upcomingBookings
     }
     return render(request, 'teacherDashboard.html', context)
 
@@ -97,7 +105,7 @@ def bookRoom(request, roomId, period, dateStr):
     bookingDate = datetime.strptime(dateStr, '%Y-%m-%d').date()
 
     if request.method == 'POST':
-        subject = request.POST.get('subject')
+        className = request.POST.get('className')
         classSize = int(request.POST.get('classSize'))
 
         # check if class size fits in the room
@@ -120,7 +128,7 @@ def bookRoom(request, roomId, period, dateStr):
                     teacher=request.user,
                     bookingDate=bookingDate,
                     periodNumber=period,
-                    subject=subject,
+                    className=className,
                     classSize=classSize
                 )
                 messages.success(request, 'Room booked successfully')
@@ -133,6 +141,49 @@ def bookRoom(request, roomId, period, dateStr):
         'username': request.user.username
     }
     return render(request, 'bookRoom.html', context)
+
+# handles booking edits and deletions
+def editBooking(request, bookingId):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    # get booking or 404, verify ownership
+    booking = get_object_or_404(Booking, pk=bookingId)
+
+    # prevent editing other people's bookings
+    if booking.teacher != request.user:
+        messages.error(request, 'You can only edit your own bookings')
+        return redirect('teacherDashboard')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'delete':
+            booking.delete()
+            messages.success(request, 'Booking cancelled successfully')
+            return redirect('teacherDashboard')
+
+        elif action == 'update':
+            className = request.POST.get('className')
+            classSize = int(request.POST.get('classSize'))
+
+            # check capacity again
+            if classSize > booking.room.capacity:
+                messages.error(request, f'Class size ({classSize}) exceeds room capacity ({booking.room.capacity})')
+            else:
+                booking.className = className
+                booking.classSize = classSize
+                booking.save()
+                messages.success(request, 'Booking updated successfully')
+                return redirect('teacherDashboard')
+
+    context = {
+        'booking': booking,
+        'room': booking.room,
+        'bookingDate': booking.bookingDate,
+        'period': booking.periodNumber
+    }
+    return render(request, 'editBooking.html', context)
 
 # admin dashboard view with authentication and privilege check
 def adminDashboard(request):
