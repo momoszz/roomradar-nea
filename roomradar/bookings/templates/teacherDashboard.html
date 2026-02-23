@@ -8,32 +8,46 @@
         .header {background: #007bff; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;}
         h1 {margin: 0; font-size: 28px;}
         .week-nav {margin-top: 15px; display: flex; align-items: center;}
-        .week-btn {background: rgba(255,255,255,0.2); color: white; text-decoration: none; padding: 5px 15px; border-radius: 4px; font-size: 14px; margin-right: 15px;}
+        .week-btn {color: white; text-decoration: none; padding: 5px 15px; border: 1px solid white; border-radius: 4px; font-size: 14px; margin-right: 15px;}
+        .week-btn:hover {background: rgba(255,255,255,0.1);}
         .week-info {font-size: 16px; font-weight: bold;}
-        .room-section {background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
-        .room-header {border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 15px;}
+        .filter-section {margin-bottom: 20px;}
+        select {padding: 8px; border-radius: 4px; border: 1px solid #ddd;}
+        .room-section {background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;}
+        .room-header {padding-bottom: 10px; margin-bottom: 15px; border-bottom: 1px solid #eee;}
         .room-name {font-size: 22px; font-weight: bold; color: #333;}
         .room-details {color: #666; font-size: 14px; margin-top: 5px;}
         table {width: 100%; border-collapse: collapse; margin-top: 10px;}
         th {background: #f8f9fa; padding: 12px 8px; text-align: center; border: 1px solid #dee2e6; font-weight: 600;}
         td {padding: 10px 8px; text-align: center; border: 1px solid #dee2e6; height: 60px;}
-        .available {background: #d4edda; color: #155724; font-weight: 500; cursor: pointer; transition: background 0.2s;}
+        .available {background: #d4edda; color: #155724; font-weight: 500;}
+        .available a {display: block; width: 100%; height: 100%; text-decoration: none; color: inherit; display: flex; align-items: center; justify-content: center;}
         .available:hover {background: #c3e6cb;}
-        .booked {background: #f8d7da; color: #721c24;}
-        .booking-info {font-size: 13px; line-height: 1.4;}
-        .teacher-name {font-weight: bold;}
-        .no-rooms {background: white; padding: 40px; text-align: center; border-radius: 8px; color: #666;}
-        a.book-link {display: block; width: 100%; height: 100%; text-decoration: none; color: inherit; display: flex; align-items: center; justify-content: center;}
+        .booked {background: #dc3545; color: white; font-weight: bold;}
+        .no-rooms {background: white; padding: 40px; text-align: center; border-radius: 8px; color: #666; border: 1px solid #ddd;}
     </style>
 </head>
 <body>
     <div class='header'>
         <h1>Welcome, {{ username }}</h1>
         <div class='week-nav'>
-            <a href='?offset={{ prevOffset }}' class='week-btn'>&larr; Previous Week</a>
+            <a href='?offset={{ prevOffset }}{% if currentRoomId %}&room={{ currentRoomId }}{% endif %}' class='week-btn'>&larr; Previous Week</a>
             <span class='week-info'>{{ weekStart|date:'d M Y' }} - {{ weekEnd|date:'d M Y' }}</span>
-            <a href='?offset={{ nextOffset }}' class='week-btn'>Next Week &rarr;</a>
+            <a href='?offset={{ nextOffset }}{% if currentRoomId %}&room={{ currentRoomId }}{% endif %}' class='week-btn'>Next Week &rarr;</a>
         </div>
+    </div>
+
+    <div class='filter-section'>
+        <form method='GET'>
+            <input type='hidden' name='offset' value='{{ weekOffset }}'>
+            <label for='roomSelect'>Filter by Room: </label>
+            <select name='room' id='roomSelect' onchange='this.form.submit()'>
+                <option value=''>All Rooms</option>
+                {% for r in allRooms %}
+                    <option value='{{ r.id }}' {% if r.id == currentRoomId %}selected{% endif %}>{{ r.roomName }}</option>
+                {% endfor %}
+            </select>
+        </form>
     </div>
 
     {% if rooms %}
@@ -63,22 +77,16 @@
                             <tr>
                                 <td style='font-weight: bold; background: #f8f9fa;'>P{{ period }}</td>
                                 {% for day in weekdays %}
-                                    {% with booking=bookingLookup|get_booking:room.id|add:","|add:period|add:","|add:day.number %}
-                                        {% if booking %}
-                                            <td class='booked'>
-                                                <div class='booking-info'>
-                                                    <div class='teacher-name'>{{ booking.teacher.username }}</div>
-                                                    <div>{{ booking.subject }}</div>
-                                                </div>
-                                            </td>
-                                        {% else %}
-                                            <td class='available'>
-                                                <a href='{% url "bookRoom" room.id period weekStart|add_days:day.number|date:"Y-m-d" %}' class='book-link'>
-                                                    Book
-                                                </a>
-                                            </td>
-                                        {% endif %}
-                                    {% endwith %}
+                                    {% get_booking bookingLookup room.id period day.number as booking %}
+                                    {% if booking %}
+                                        <td class='booked'>Booked</td>
+                                    {% else %}
+                                        <td class='available'>
+                                            <a href='{% url "bookRoom" room.id period weekStart|add_days:day.number|date:"Y-m-d" %}'>
+                                                Book
+                                            </a>
+                                        </td>
+                                    {% endif %}
                                 {% endfor %}
                             </tr>
                         {% endfor %}
@@ -88,8 +96,8 @@
         {% endfor %}
     {% else %}
         <div class='no-rooms'>
-            <h2>No Rooms Available</h2>
-            <p>Please contact your administrator to add rooms to the system.</p>
+            <h2>No Rooms Found</h2>
+            <p>Try changing your filter settings.</p>
         </div>
     {% endif %}
 </body>
