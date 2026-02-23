@@ -39,7 +39,9 @@ td {padding: 0; text-align: center; border: 1px solid #dee2e6; height: 50px; fon
 .available {background: #d4edda; color: #155724;}
 .available a {display: flex; width: 100%; height: 50px; text-decoration: none; color: inherit; align-items: center; justify-content: center;}
 
-.booked {background: #dc3545; color: white; font-weight: bold; vertical-align: middle;}
+.booked {background: #dc3545; color: white; vertical-align: middle; padding: 5px; font-size: 13px;}
+.booked-teacher {font-weight: bold; margin-bottom: 2px;}
+.booked-class {opacity: 0.9; font-size: 12px;}
 
 .my-booking {background: #28a745; color: white; font-weight: bold;}
 .my-booking a {display: flex; width: 100%; height: 50px; text-decoration: none; color: white; align-items: center; justify-content: center;}

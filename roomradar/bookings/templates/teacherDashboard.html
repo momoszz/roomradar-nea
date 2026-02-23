@@ -79,7 +79,10 @@
                                                     <a href='{% url "editBooking" booking.bookingID %}'>My Class</a>
                                                 </td>
                                             {% else %}
-                                                <td class='booked'>Booked</td>
+                                                <td class='booked'>
+                                                    <div class='booked-teacher'>{{ booking.teacher.username }}</div>
+                                                    <div class='booked-class'>{{ booking.className }}</div>
+                                                </td>
                                             {% endif %}
                                         {% else %}
                                             <td class='available'>
