@@ -27,6 +27,10 @@ def teacherDashboard(request):
 
     # get date offset from url, default to 0 for current week
     weekOffset = int(request.GET.get('offset', 0))
+
+    # get selected room id for filtering
+    roomId = request.GET.get('room')
+    currentRoomId = int(roomId) if roomId else None
     
     # work out what week we're in - get monday and friday dates
     today = date.today() + timedelta(weeks=weekOffset)
@@ -34,8 +38,16 @@ def teacherDashboard(request):
     weekStart = today - timedelta(days=weekday)  # go back to this week's monday
     weekEnd = weekStart + timedelta(days=4)  # friday is 4 days after monday
     
-    # get all rooms and bookings in one go to avoid loads of database queries
+    # get all rooms for dropdown
     allRooms = Room.objects.all()
+
+    # filter rooms for display if a specific one is selected
+    if currentRoomId:
+        displayRooms = allRooms.filter(id=currentRoomId)
+    else:
+        displayRooms = allRooms
+
+    # get bookings for the week
     allBookings = Booking.objects.filter(
         bookingDate__gte=weekStart,
         bookingDate__lte=weekEnd
@@ -61,7 +73,9 @@ def teacherDashboard(request):
     
     context = {
         'username': request.user.username,
-        'rooms': allRooms,
+        'rooms': displayRooms,
+        'allRooms': allRooms,
+        'currentRoomId': currentRoomId,
         'periods': periods,
         'weekdays': weekdays,
         'bookingLookup': bookingLookup,
