@@ -6,4 +6,5 @@ urlpatterns = [
     path('', views.loginView, name='login'),  # root url shows login page
     path('dashboard/teacher/', views.teacherDashboard, name='teacherDashboard'),
     path('dashboard/admin/', views.adminDashboard, name='adminDashboard'),
+    path('book/<int:roomId>/<int:period>/<str:dateStr>/', views.bookRoom, name='bookRoom'),
 ]
