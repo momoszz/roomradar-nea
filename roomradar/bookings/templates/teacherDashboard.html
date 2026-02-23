@@ -1,18 +1,84 @@
+{% load booking_filters %}
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard - RoomRadar</title>
+    <title>Teacher Dashboard - RoomRadar</title>
     <style>
-        body {font-family: Arial; margin: 20px; background: #f5f5f5;}
-        .header {background: white; padding: 20px; border-radius: 10px;}
-        h1 {color: #007 bff; margin: 0;}
-        p {color: #666;}
+        body {font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5;}
+        .header {background: #007bff; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;}
+        h1 {margin: 0; font-size: 28px;}
+        .week-info {margin-top: 10px; font-size: 14px; opacity: 0.9;}
+        .room-section {background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;}
+        .room-header {border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 15px;}
+        .room-name {font-size: 22px; font-weight: bold; color: #333;}
+        .room-details {color: #666; font-size: 14px; margin-top: 5px;}
+        table {width: 100%; border-collapse: collapse; margin-top: 10px;}
+        th {background: #f8f9fa; padding: 12px 8px; text-align: center; border: 1px solid #dee2e6; font-weight: 600;}
+        td {padding: 15px 8px; text-align: center; border: 1px solid #dee2e6;}
+        .available {background: #d4edda; color: #155724; font-weight: 500;}
+        .booked {background: #f8d7da; color: #721c24;}
+        .booking-info {font-size: 13px; line-height: 1.4;}
+        .teacher-name {font-weight: bold;}
+        .no-rooms {background: white; padding: 40px; text-align: center; border-radius: 8px; color: #666;}
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Welcome, {{ username }}!</h1>
-        <p>Dashboard coming soon in Iteration 2...</p>
+    <div class='header'>
+        <h1>Welcome, {{ username }} (Teacher)</h1>
+        <div class='week-info'>Room Availability for Week: {{ weekStart|date:'d M Y' }} - {{ weekEnd|date:'d M Y' }}</div>
     </div>
+
+    {% if rooms %}
+        {% for room in rooms %}
+            <div class='room-section'>
+                <div class='room-header'>
+                    <div class='room-name'>{{ room.roomName }}</div>
+                    <div class='room-details'>
+                        Capacity: {{ room.capacity }} | 
+                        Block: {{ room.blockLocation }} | 
+                        Projector: {% if room.hasProjector %}Yes{% else %}No{% endif %} | 
+                        Computers: {% if room.hasComputers %}Yes{% else %}No{% endif %}
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th style='width: 80px;'>Period</th>
+                            {% for day in weekdays %}
+                                <th>{{ day.name }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for period in periods %}
+                            <tr>
+                                <td style='font-weight: bold; background: #f8f9fa;'>P{{ period }}</td>
+                                {% for day in weekdays %}
+                                    {% with booking=bookingLookup|get_booking:room.id|add:","|add:period|add:","|add:day.number %}
+                                        {% if booking %}
+                                            <td class='booked'>
+                                                <div class='booking-info'>
+                                                    <div class='teacher-name'>{{ booking.teacher.username }}</div>
+                                                    <div>{{ booking.subject }}</div>
+                                                </div>
+                                            </td>
+                                        {% else %}
+                                            <td class='available'>Available</td>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class='no-rooms'>
+            <h2>No Rooms Available</h2>
+            <p>Please contact your administrator to add rooms to the system.</p>
+        </div>
+    {% endif %}
 </body>
 </html>
