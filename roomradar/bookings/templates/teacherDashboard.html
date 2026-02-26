@@ -75,11 +75,17 @@
                                         {% get_booking bookingLookup room.id period day.number as booking %}
                                         {% if booking %}
                                             {% if booking.teacher.username == username %}
-                                                <td class='my-booking'>
-                                                    <a href='{% url "editBooking" booking.bookingID %}'>My Class</a>
-                                                </td>
+                                                 <td class='my-booking'>
+                                                     <a href='{% url "editBooking" booking.bookingID %}'>
+                                                        <span>My Class</span>
+                                                        <span class="sub-text">{{ booking.className }}</span>
+                                                     </a>
+                                                 </td>
                                             {% else %}
-                                                <td class='booked'>Booked</td>
+                                                <td class='booked'>
+                                                    <div class='booked-teacher'>{{ booking.teacher.username }}</div>
+                                                    <div class='booked-class'>{{ booking.className }}</div>
+                                                </td>
                                             {% endif %}
                                         {% else %}
                                             <td class='available'>
