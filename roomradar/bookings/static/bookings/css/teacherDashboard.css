@@ -36,14 +36,15 @@ td {padding: 0; text-align: center; border: 1px solid #dee2e6; height: 50px; fon
 /* cell states */
 .period-cell {font-weight: bold; background: #f8f9fa; width: 60px;}
 
-.available {background: #d4edda; color: #155724;}
-.available a {display: flex; width: 100%; height: 50px; text-decoration: none; color: inherit; align-items: center; justify-content: center;}
+.available {background: #e8efea; color: #155724;}
+.available a {display: flex; width: 100%; height: 100%; min-height: 50px; text-decoration: none; color: inherit; align-items: center; justify-content: center;}
 
-.booked {background: #dc3545; color: white; vertical-align: middle; padding: 5px; font-size: 13px;}
+.booked {background: #dc3545; color: white; vertical-align: middle; padding: 5px; font-size: 13px; box-sizing: border-box;}
 .booked-teacher {font-weight: bold; margin-bottom: 2px;}
 .booked-class {opacity: 0.9; font-size: 12px;}
 
-.my-booking {background: #28a745; color: white; font-weight: bold;}
-.my-booking a {display: flex; width: 100%; height: 50px; text-decoration: none; color: white; align-items: center; justify-content: center;}
+.my-booking {background: #28a745; color: white; font-weight: bold; padding: 0;}
+.my-booking a {display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 50px; text-decoration: none; color: white; justify-content: center; align-items: center; line-height: 1.2; padding: 5px; box-sizing: border-box;}
+.my-booking .sub-text {font-weight: normal; font-size: 12px; opacity: 0.9;}
 
 .no-rooms {background: white; padding: 40px; text-align: center; border-radius: 8px; color: #666;}
