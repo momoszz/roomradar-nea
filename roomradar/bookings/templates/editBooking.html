@@ -34,8 +34,13 @@
                 <input type='number' id='classSize' name='classSize' value='{{ booking.classSize }}' required min='1' max='{{ room.capacity }}'>
             </div>
 
-            <button type='submit' name='action' value='update' class='update-btn'>Update Booking</button>
-            <button type='submit' name='action' value='delete' class='delete-btn' onclick='return confirm("Are you sure you want to cancel this booking?");'>Cancel Booking</button>
+            {% if booking.status == 'confirmed' %}
+                <button type='submit' name='action' value='update' class='update-btn'>Update Booking</button>
+                <button type='submit' name='action' value='delete' class='delete-btn' onclick='return confirm("Are you sure you want to cancel this booking?");'>Cancel Booking</button>
+                <a href='{% url "transferBooking" booking.bookingID %}' class='transfer-link'>Transfer Booking</a>
+            {% else %}
+                <button type='submit' name='action' value='cancelTransfer' class='transfer-btn'>Cancel/Edit Transfer</button>
+            {% endif %}
         </form>
 
         <a href='{% url "teacherDashboard" %}' class='back-link'>Go Back</a>

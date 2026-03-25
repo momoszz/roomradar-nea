@@ -14,13 +14,22 @@ class Room(models.Model):
 
 # stores individual booking records linking teachers to rooms and periods
 class Booking(models.Model):
+    STATUS_CHOICES = (
+        ('confirmed', 'Confirmed'),
+        ('pending', 'Pending Transfer'),
+        ('rejected', 'Transfer Rejected')
+    )
+
     bookingID = models.AutoField(primary_key=True)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)  # deletes all bookings if room deleted
-    teacher = models.ForeignKey(User, on_delete=models.CASCADE)  # links booking to teacher account
+    teacher = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')  # links booking to teacher account
     bookingDate = models.DateField()
     periodNumber = models.IntegerField()  # 1-6 for school periods
     className = models.CharField(max_length=50)  # renamed from subject for clarity
     classSize = models.IntegerField()  # used to check room capacity later
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='confirmed')  # tracks transfer state
+    transferTo = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='incomingTransfers')  # intended recipient
 
     def __str__(self):
         return f'{self.room.roomName} - Period {self.periodNumber}'  # readable format for admin panel

@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transfer Booking - RoomRadar</title>
+    <link rel='stylesheet' href='{% static "bookings/css/transferBooking.css" %}'>
+</head>
+<body>
+    <div class='form-container'>
+        <h1>Transfer Booking</h1>
+
+        <div class='room-info'>
+            <div><strong>Room:</strong> {{ room.roomName }}</div>
+            <div><strong>Date:</strong> {{ bookingDate|date:'l, d M Y' }}</div>
+            <div><strong>Period:</strong> {{ period }}</div>
+            <div><strong>Class:</strong> {{ booking.className }}</div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class='error'>{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method='POST'>
+            {% csrf_token %}
+            <div class='form-group'>
+                <label for='recipientUsername'>Transfer To (Teacher Username)</label>
+                <input type='text' id='recipientUsername' name='recipientUsername' list='teachersList' required autocomplete='off'>
+                <datalist id='teachersList'>
+                    {% for teacher in teachers %}
+                        <option value='{{ teacher.username }}'></option>
+                    {% endfor %}
+                </datalist>
+            </div>
+
+            <button type='submit' class='transfer-btn'>Confirm Transfer Request</button>
+        </form>
+
+        <a href='{% url "editBooking" booking.bookingID %}' class='back-link'>Cancel</a>
+    </div>
+</body>
+</html>

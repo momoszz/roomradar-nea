@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import Room, Booking
 from datetime import date, timedelta, datetime
@@ -67,6 +68,20 @@ def teacherDashboard(request):
         bookingDate__gte=date.today()
     ).order_by('bookingDate', 'periodNumber')
 
+    # get incoming transfer requests for the sidebar
+    incomingTransfers = Booking.objects.filter(
+        transferTo=request.user,
+        status='pending',
+        bookingDate__gte=date.today()
+    ).order_by('bookingDate', 'periodNumber')
+
+    # get rejected transfers for the sidebar
+    rejectedTransfers = Booking.objects.filter(
+        teacher=request.user,
+        status='rejected',
+        bookingDate__gte=date.today()
+    ).order_by('bookingDate', 'periodNumber')
+
     # periods 1-6 for the school day
     periods = list(range(1, 7))
     # weekdays with their numbers so template can do lookups
@@ -91,7 +106,9 @@ def teacherDashboard(request):
         'weekOffset': weekOffset,
         'prevOffset': weekOffset - 1,
         'nextOffset': weekOffset + 1,
-        'upcomingBookings': upcomingBookings
+        'upcomingBookings': upcomingBookings,
+        'incomingTransfers': incomingTransfers,
+        'rejectedTransfers': rejectedTransfers
     }
     return render(request, 'teacherDashboard.html', context)
 
@@ -163,6 +180,13 @@ def editBooking(request, bookingId):
             messages.success(request, 'Booking cancelled successfully')
             return redirect('teacherDashboard')
 
+        elif action == 'cancelTransfer':
+            booking.status = 'confirmed'
+            booking.transferTo = None
+            booking.save()
+            messages.success(request, 'Transfer request cancelled successfully')
+            return redirect('teacherDashboard')
+
         elif action == 'update':
             className = request.POST.get('className')
             classSize = int(request.POST.get('classSize'))
@@ -184,6 +208,93 @@ def editBooking(request, bookingId):
         'period': booking.periodNumber
     }
     return render(request, 'editBooking.html', context)
+
+# handles creating a transfer request
+def transferBooking(request, bookingId):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    booking = get_object_or_404(Booking, pk=bookingId)
+
+    if booking.teacher != request.user:
+        messages.error(request, 'You can only transfer your own bookings')
+        return redirect('teacherDashboard')
+
+    if booking.status == 'pending':
+        messages.error(request, 'This booking is already pending a transfer')
+        return redirect('teacherDashboard')
+
+    if request.method == 'POST':
+        recipientUsername = request.POST.get('recipientUsername').strip().lower()
+
+        # find the user, checking they exist and aren't the original teacher
+        try:
+            recipient = User.objects.get(username__iexact=recipientUsername)
+            if recipient == request.user:
+                messages.error(request, 'You cannot transfer a booking to yourself')
+            elif recipient.is_staff:
+                messages.error(request, 'You cannot transfer a booking to an admin')
+            else:
+                booking.status = 'pending'
+                booking.transferTo = recipient
+                booking.save()
+                messages.success(request, f'Transfer request sent to {recipient.username}')
+                return redirect('teacherDashboard')
+        except User.DoesNotExist:
+            messages.error(request, 'Teacher not found')
+
+    # get list of other teachers for the datalist dropdown
+    teachers = User.objects.filter(is_staff=False).exclude(id=request.user.id)
+
+    context = {
+        'booking': booking,
+        'room': booking.room,
+        'bookingDate': booking.bookingDate,
+        'period': booking.periodNumber,
+        'teachers': teachers
+    }
+    return render(request, 'transferBooking.html', context)
+
+# handles recipient accepting or rejecting a transfer
+def handleTransfer(request, bookingId, action):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    if request.method != 'POST':
+        return redirect('teacherDashboard')
+
+    booking = get_object_or_404(Booking, pk=bookingId)
+
+    if booking.transferTo != request.user or booking.status != 'pending':
+        messages.error(request, 'Invalid transfer request')
+        return redirect('teacherDashboard')
+
+    if action == 'accept':
+        booking.teacher = request.user
+        booking.status = 'confirmed'
+        booking.transferTo = None
+        booking.save()
+        messages.success(request, f'Successfully accepted transfer for {booking.room.roomName}')
+    elif action == 'reject':
+        booking.status = 'rejected'
+        # do not clear transferTo so original teacher knows who rejected it
+        booking.save()
+        messages.success(request, f'Rejected transfer request from {booking.teacher.username}')
+
+    return redirect('teacherDashboard')
+
+def dismissRejection(request, bookingId):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    if request.method == 'POST':
+        booking = get_object_or_404(Booking, pk=bookingId)
+        if booking.teacher == request.user and booking.status == 'rejected':
+            booking.status = 'confirmed'
+            booking.transferTo = None
+            booking.save()
+
+    return redirect('teacherDashboard')
 
 # admin dashboard view with authentication and privilege check
 def adminDashboard(request):

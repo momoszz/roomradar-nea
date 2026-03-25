@@ -17,6 +17,15 @@ h1 {margin: 0; font-size: 24px;}
 .upcoming-details {color: #666; margin-top: 4px; font-size: 13px;}
 .empty-list {color: #999; font-style: italic; padding: 10px 0; font-size: 14px;}
 
+.transfer-notices {margin-bottom: 15px;}
+.transfer-alert {background: #fff3cd; color: #856404; padding: 15px; border: 1px solid #ffeeba; border-radius: 4px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
+.rejected-alert {background: #f8d7da; color: #721c24; border-color: #f5c6cb;}
+.transfer-details {font-size: 14px;}
+.transfer-sender {font-size: 13px; opacity: 0.9;}
+.transfer-actions button {border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold;}
+.accept-btn {background: #28a745; color: white; margin-right: 5px;}
+.reject-btn {background: #dc3545; color: white;}
+
 /* filter styling */
 .filter-section {margin-bottom: 20px; display: flex; align-items: center;}
 .filter-section label {font-weight: bold; margin-right: 10px; color: #555;}
@@ -42,6 +51,10 @@ td {padding: 0; text-align: center; border: 1px solid #dee2e6; height: 50px; fon
 .booked {background: #dc3545; color: white; vertical-align: middle; padding: 5px; font-size: 13px; box-sizing: border-box;}
 .booked-teacher {font-weight: bold; margin-bottom: 2px;}
 .booked-class {opacity: 0.9; font-size: 12px;}
+
+.pending-transfer {background: #ffc107; color: #333; vertical-align: middle; padding: 5px; font-size: 13px; box-sizing: border-box; font-weight: bold;}
+.pending-transfer a {display: flex; flex-direction: column; width: 100%; height: 100%; text-decoration: none; color: inherit; align-items: center; justify-content: center;}
+.transfer-text {margin-bottom: 2px;}
 
 .my-booking {background: #28a745; color: white; font-weight: bold;}
 .my-booking a {display: flex; width: 100%; height: 50px; text-decoration: none; color: white; align-items: center; justify-content: center;}
