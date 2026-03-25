@@ -18,6 +18,48 @@
 
     <div class='upcoming-section'>
         <h2>My Upcoming Bookings</h2>
+        {% if incomingTransfers %}
+            <div class='transfer-notices'>
+                {% for transfer in incomingTransfers %}
+                    <div class='transfer-alert'>
+                        <div class='transfer-details'>
+                            <strong>Transfer Request:</strong> {{ transfer.room.roomName }} - Period {{ transfer.periodNumber }} on {{ transfer.bookingDate|date:'D, d M' }}
+                            <br>
+                            <span class='transfer-sender'>From: {{ transfer.teacher.username }}</span>
+                        </div>
+                        <div class='transfer-actions'>
+                            <form method='POST' action='{% url "handleTransfer" transfer.bookingID "accept" %}' style='display: inline;'>
+                                {% csrf_token %}
+                                <button type='submit' class='accept-btn'>Accept</button>
+                            </form>
+                            <form method='POST' action='{% url "handleTransfer" transfer.bookingID "reject" %}' style='display: inline;'>
+                                {% csrf_token %}
+                                <button type='submit' class='reject-btn'>Reject</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if rejectedTransfers %}
+            <div class='transfer-notices'>
+                {% for transfer in rejectedTransfers %}
+                    <div class='transfer-alert rejected-alert'>
+                        <div class='transfer-details'>
+                            <strong>Transfer Declined:</strong> {{ transfer.transferTo.username }} rejected your transfer for {{ transfer.room.roomName }} - Period {{ transfer.periodNumber }} on {{ transfer.bookingDate|date:'D, d M' }}.
+                        </div>
+                        <div class='transfer-actions'>
+                            <form method='POST' action='{% url "dismissRejection" transfer.bookingID %}' style='display: inline;'>
+                                {% csrf_token %}
+                                <button type='submit' class='accept-btn'>Dismiss</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         {% if upcomingBookings %}
             <ul class='upcoming-list'>
                 {% for booking in upcomingBookings %}
@@ -74,7 +116,19 @@
                                     {% for day in weekdays %}
                                         {% get_booking bookingLookup room.id period day.number as booking %}
                                         {% if booking %}
-                                            {% if booking.teacher.username == username %}
+                                            {% if booking.status == 'pending' %}
+                                                <td class='pending-transfer'>
+                                                    {% if booking.teacher.username == username %}
+                                                        <a href='{% url "editBooking" booking.bookingID %}'>
+                                                            <div class='transfer-text'>Pending transfer</div>
+                                                            <div class='booked-teacher'>{{ booking.teacher.username }}</div>
+                                                        </a>
+                                                    {% else %}
+                                                        <div class='transfer-text'>Pending transfer</div>
+                                                        <div class='booked-teacher'>{{ booking.teacher.username }}</div>
+                                                    {% endif %}
+                                                </td>
+                                            {% elif booking.teacher.username == username %}
                                                 <td class='my-booking'>
                                                     <a href='{% url "editBooking" booking.bookingID %}'>My Class</a>
                                                 </td>
