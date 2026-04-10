@@ -301,3 +301,23 @@ def adminDashboard(request):
     if not request.user.is_authenticated or not request.user.is_staff:  # must be logged in AND admin
         return redirect('login')
     return render(request, 'adminDashboard.html', {'username': request.user.username})
+
+# handles creating new teacher accounts from the admin dashboard
+def addTeacher(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect('login')
+
+    if request.method == 'POST':
+        newUsername = request.POST.get('username').strip().lower()  # prevents case/spacing issues
+        newPassword = request.POST.get('password')
+
+        # check if username already exists
+        if User.objects.filter(username__iexact=newUsername).exists():
+            messages.error(request, f'Username "{newUsername}" is already taken')
+        else:
+            # create standard user (not staff)
+            User.objects.create_user(username=newUsername, password=newPassword)
+            messages.success(request, f'Successfully created account for {newUsername}')
+            return redirect('adminDashboard')
+
+    return render(request, 'addTeacher.html')

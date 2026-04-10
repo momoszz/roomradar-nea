@@ -1,18 +1,31 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>Admin Dashboard - RoomRadar</title>
-    <style>
-        body {font-family: Arial; margin: 20px; background: #f5f5f5;}
-        .header {background: #358edc; color: white; padding: 20px; border-radius: 10px;}
-        h1 {margin: 0;}
-    </style>
+    <link rel='stylesheet' href='{% static "bookings/css/adminDashboard.css" %}'>
 </head>
 <body>
-    <div class="header">
+    <div class='header'>
         <h1>Admin Dashboard</h1>
         <p>Welcome, {{ username }} (Administrator)</p>
-        <p>Dashboard coming in iteration 2...</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style='color: #28a745; font-weight: bold; margin-bottom: 15px;'>{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class='admin-actions'>
+        <h2>Manage Teachers</h2>
+        <ul class='action-list'>
+            <li class='action-item'>
+                <a href='{% url "addTeacher" %}'>Add Teacher</a>
+                <span class='action-description'>Create a new teacher account for the booking system.</span>
+            </li>
+            <!-- manage rooms and password reset coming in future iterations -->
+        </ul>
     </div>
 </body>
 </html>
