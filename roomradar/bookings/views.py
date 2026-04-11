@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.utils.crypto import get_random_string
 from .models import Room, Booking
 from datetime import date, timedelta, datetime
 
@@ -372,6 +373,43 @@ def adminEditRoom(request, roomId):
                 return redirect('manageRooms')
 
     return render(request, 'adminEditRoom.html', {'room': room})
+
+# handles resetting a teacher's password manually or generating a secure one
+def resetPassword(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect('login')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        targetUsername = request.POST.get('targetUsername').strip().lower()
+
+        try:
+            targetUser = User.objects.get(username__iexact=targetUsername)
+
+            if targetUser.is_staff:
+                messages.error(request, 'You cannot reset an administrator password here')
+            else:
+                if action == 'generate':
+                    newPassword = get_random_string(12)
+                    targetUser.set_password(newPassword)
+                    targetUser.save()
+                    messages.success(request, f'Password for {targetUser.username} has been reset. New generated password: {newPassword}')
+                    return redirect('adminDashboard')
+                elif action == 'manual':
+                    newPassword = request.POST.get('newPassword')
+                    if not newPassword:
+                        messages.error(request, 'You must provide a password for manual reset')
+                    else:
+                        targetUser.set_password(newPassword)
+                        targetUser.save()
+                        messages.success(request, f'Password for {targetUser.username} has been manually updated')
+                        return redirect('adminDashboard')
+        except User.DoesNotExist:
+            messages.error(request, 'Teacher account not found')
+
+    # get list of teachers for the dropdown
+    teachers = User.objects.filter(is_staff=False)
+    return render(request, 'resetPassword.html', {'teachers': teachers})
 
 # handles creating new teacher accounts from the admin dashboard
 def addTeacher(request):
