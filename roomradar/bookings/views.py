@@ -302,6 +302,77 @@ def adminDashboard(request):
         return redirect('login')
     return render(request, 'adminDashboard.html', {'username': request.user.username})
 
+# lists all rooms for admin management
+def manageRooms(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect('login')
+
+    allRooms = Room.objects.all().order_by('roomName')
+    return render(request, 'manageRooms.html', {'rooms': allRooms})
+
+# handles creating a new room from the admin dashboard
+def addRoom(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect('login')
+
+    if request.method == 'POST':
+        roomName = request.POST.get('roomName').strip()
+        capacity = int(request.POST.get('capacity'))
+        blockLocation = request.POST.get('blockLocation').strip()
+        hasProjector = request.POST.get('hasProjector') == 'on'
+        hasComputers = request.POST.get('hasComputers') == 'on'
+
+        # check if room already exists
+        if Room.objects.filter(roomName__iexact=roomName).exists():
+            messages.error(request, f'Room "{roomName}" already exists')
+        else:
+            Room.objects.create(
+                roomName=roomName,
+                capacity=capacity,
+                blockLocation=blockLocation,
+                hasProjector=hasProjector,
+                hasComputers=hasComputers
+            )
+            messages.success(request, f'Successfully added room {roomName}')
+            return redirect('manageRooms')
+
+    return render(request, 'addRoom.html')
+
+# handles editing and deleting rooms from the admin dashboard
+def adminEditRoom(request, roomId):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect('login')
+
+    room = get_object_or_404(Room, pk=roomId)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'delete':
+            roomName = room.roomName
+            room.delete()
+            messages.success(request, f'Successfully deleted room {roomName}')
+            return redirect('manageRooms')
+
+        elif action == 'update':
+            newRoomName = request.POST.get('roomName').strip()
+
+            # check if new name is taken by another room
+            if newRoomName.lower() != room.roomName.lower() and Room.objects.filter(roomName__iexact=newRoomName).exists():
+                messages.error(request, f'Room name "{newRoomName}" is already taken')
+            else:
+                room.roomName = newRoomName
+                room.capacity = int(request.POST.get('capacity'))
+                room.blockLocation = request.POST.get('blockLocation').strip()
+                room.hasProjector = request.POST.get('hasProjector') == 'on'
+                room.hasComputers = request.POST.get('hasComputers') == 'on'
+                room.save()
+
+                messages.success(request, f'Successfully updated room {room.roomName}')
+                return redirect('manageRooms')
+
+    return render(request, 'adminEditRoom.html', {'room': room})
+
 # handles creating new teacher accounts from the admin dashboard
 def addTeacher(request):
     if not request.user.is_authenticated or not request.user.is_staff:

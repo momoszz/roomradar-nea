@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Rooms - RoomRadar</title>
+    <link rel='stylesheet' href='{% static "bookings/css/manageRooms.css" %}'>
+</head>
+<body>
+    <div class='header'>
+        <h1>Manage Rooms</h1>
+        <p>Add, edit, or delete rooms in the system.</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class='message-alert'>{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class='add-room-section'>
+        <a href='{% url "addRoom" %}' class='add-room-btn'>Add New Room</a>
+        <a href='{% url "adminDashboard" %}' class='back-link'>Back to Dashboard</a>
+    </div>
+
+    {% if rooms %}
+        {% for room in rooms %}
+            <div class='room-section'>
+                <div class='room-header'>
+                    <div class='room-name'>{{ room.roomName }}</div>
+                    <div class='room-details'>
+                        Capacity: {{ room.capacity }} |
+                        Block: {{ room.blockLocation }} |
+                        Projector: {% if room.hasProjector %}Yes{% else %}No{% endif %} |
+                        Computers: {% if room.hasComputers %}Yes{% else %}No{% endif %}
+                    </div>
+                </div>
+                <div class='room-actions'>
+                    <a href='{% url "adminEditRoom" room.id %}' class='edit-btn'>Edit Room</a>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class='no-rooms'>
+            <h2>No Rooms Found</h2>
+            <p>There are currently no rooms in the system. Add one to get started.</p>
+        </div>
+    {% endif %}
+</body>
+</html>

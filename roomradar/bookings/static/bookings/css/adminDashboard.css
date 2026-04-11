@@ -1,13 +1,13 @@
 body {font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5;}
-.header {background: #358edc; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;}
-h1 {margin: 0;}
+.header {background: #dc3545; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;}
+h1 {margin: 0; font-size: 24px;}
 
-.admin-actions {background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;}
+.admin-actions {background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;}
 .admin-actions h2 {font-size: 18px; margin-top: 0; padding-bottom: 10px; color: #333; border-bottom: 1px solid #eee;}
 
 .action-list {list-style: none; padding: 0; margin: 0;}
 .action-item {padding: 10px 0; border-bottom: 1px solid #eee;}
 .action-item:last-child {border-bottom: none;}
 
-.action-item a {display: inline-block; padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;}
+.action-item a {display: inline-block; padding: 8px 16px; background: #dc3545; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;}
 .action-description {display: inline-block; margin-left: 15px; color: #666; font-size: 14px;}

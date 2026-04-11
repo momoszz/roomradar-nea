@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Room - RoomRadar</title>
+    <link rel='stylesheet' href='{% static "bookings/css/addRoom.css" %}'>
+</head>
+<body>
+    <div class='form-container'>
+        <h1>Add Room</h1>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class='error'>{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method='POST'>
+            {% csrf_token %}
+            <div class='form-group'>
+                <label for='roomName'>Room Name</label>
+                <input type='text' id='roomName' name='roomName' required>
+            </div>
+
+            <div class='form-group'>
+                <label for='capacity'>Capacity</label>
+                <input type='number' id='capacity' name='capacity' required min='1'>
+            </div>
+
+            <div class='form-group'>
+                <label for='blockLocation'>Block Location</label>
+                <input type='text' id='blockLocation' name='blockLocation' required>
+            </div>
+
+            <div class='form-group checkbox-group'>
+                <input type='checkbox' id='hasProjector' name='hasProjector'>
+                <label for='hasProjector'>Has Projector</label>
+            </div>
+
+            <div class='form-group checkbox-group'>
+                <input type='checkbox' id='hasComputers' name='hasComputers'>
+                <label for='hasComputers'>Has Computers</label>
+            </div>
+
+            <button type='submit' class='add-btn'>Save Room</button>
+        </form>
+
+        <a href='{% url "manageRooms" %}' class='back-link'>Cancel</a>
+    </div>
+</body>
+</html>

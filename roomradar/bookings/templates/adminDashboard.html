@@ -24,7 +24,17 @@
                 <a href='{% url "addTeacher" %}'>Add Teacher</a>
                 <span class='action-description'>Create a new teacher account for the booking system.</span>
             </li>
-            <!-- manage rooms and password reset coming in future iterations -->
+            <!-- password reset coming in future iterations -->
+        </ul>
+    </div>
+
+    <div class='admin-actions'>
+        <h2>Manage Rooms</h2>
+        <ul class='action-list'>
+            <li class='action-item'>
+                <a href='{% url "manageRooms" %}'>Manage Rooms</a>
+                <span class='action-description'>Add, edit, or delete rooms in the system.</span>
+            </li>
         </ul>
     </div>
 </body>
