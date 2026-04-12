@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Room Utilisation Heatmap - RoomRadar</title>
+    <link rel='stylesheet' href='{% static "bookings/css/heatmap.css" %}'>
+</head>
+<body>
+    <div class='header'>
+        <h1>Room Utilisation Heatmap</h1>
+
+        <form method='GET' class='date-form'>
+            <div class='date-inputs'>
+                <div class='input-group'>
+                    <label for='startDate'>Start Date</label>
+                    <input type='date' id='startDate' name='startDate' value='{{ startDate }}' required>
+                </div>
+                <div class='input-group'>
+                    <label for='endDate'>End Date</label>
+                    <input type='date' id='endDate' name='endDate' value='{{ endDate }}' required>
+                </div>
+            </div>
+            <button type='submit' class='submit-btn'>Generate Heatmap</button>
+        </form>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class='error'>{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class='content-section'>
+        {% if not hasSearched %}
+            <div class='empty-state'>Select a date range to view utilisation data.</div>
+        {% elif noBookings %}
+            <div class='empty-state'>No bookings found for this period.</div>
+        {% else %}
+            <div class='grid-container'>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class='room-col'>Room</th>
+                            {% for period in periods %}
+                                <th>P{{ period }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in heatmapData %}
+                            <tr>
+                                <td class='room-cell'>{{ row.room.roomName }}</td>
+                                {% for cell in row.periods %}
+                                    <td class='percent-cell {{ cell.colorClass }}'>
+                                        {{ cell.percent }}%
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class='summary-section'>
+                <div class='stat-card'>
+                    <div class='stat-label'>Most Utilised Room</div>
+                    <div class='stat-value'>{{ mostUtilised }}</div>
+                </div>
+                <div class='stat-card'>
+                    <div class='stat-label'>Least Utilised Room</div>
+                    <div class='stat-value'>{{ leastUtilised }}</div>
+                </div>
+                <div class='stat-card'>
+                    <div class='stat-label'>Peak Period</div>
+                    <div class='stat-value'>{{ peakPeriod }}</div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <a href='{% url "adminDashboard" %}' class='back-link'>Back to Dashboard</a>
+</body>
+</html>

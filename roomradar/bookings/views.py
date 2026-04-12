@@ -374,6 +374,126 @@ def adminEditRoom(request, roomId):
 
     return render(request, 'adminEditRoom.html', {'room': room})
 
+# calculates and displays the room utilisation heatmap for a given date range
+def roomHeatmap(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect('login')
+
+    # get dates from the query string (defaults to none if form not submitted)
+    startDateStr = request.GET.get('startDate')
+    endDateStr = request.GET.get('endDate')
+
+    context = {
+        'startDate': startDateStr,
+        'endDate': endDateStr,
+        'hasSearched': bool(startDateStr and endDateStr)
+    }
+
+    if context['hasSearched']:
+        try:
+            # parse the string dates into proper date objects so we can do math on them
+            startDate = datetime.strptime(startDateStr, '%Y-%m-%d').date()
+            endDate = datetime.strptime(endDateStr, '%Y-%m-%d').date()
+
+            # make sure start is before end to prevent weird negative weekday counts
+            if startDate > endDate:
+                messages.error(request, 'Start date must be before end date')
+                return render(request, 'heatmap.html', context)
+
+            # count total weekdays between the dates (monday=0, sunday=6)
+            # we need this to figure out the percentage out of total possible booking days
+            totalWeekdays = 0
+            currentDate = startDate
+            while currentDate <= endDate:
+                if currentDate.weekday() < 5:  # 0-4 are mon-fri
+                    totalWeekdays += 1
+                currentDate += timedelta(days=1)
+
+            if totalWeekdays == 0:
+                messages.error(request, 'Selected range contains no weekdays')
+                return render(request, 'heatmap.html', context)
+
+            # grab all bookings in the range
+            bookings = Booking.objects.filter(
+                bookingDate__gte=startDate,
+                bookingDate__lte=endDate
+            )
+
+            if not bookings.exists():
+                context['noBookings'] = True
+                return render(request, 'heatmap.html', context)
+
+            # fetch all rooms to build the rows of the grid
+            rooms = Room.objects.all().order_by('roomName')
+            periods = list(range(1, 7))
+
+            # dictionaries to track our totals for the summary cards
+            roomTotals = {r.id: 0 for r in rooms}
+            periodTotals = {p: 0 for p in periods}
+
+            # the main grid data structure. maps room object to a list of dicts representing each period
+            heatmapData = []
+
+            for room in rooms:
+                periodData = []
+                for period in periods:
+                    # count how many times this specific slot was booked in the range
+                    count = bookings.filter(room=room, periodNumber=period).count()
+
+                    # calc percentage and round to whole number
+                    percent = int((count / totalWeekdays) * 100)
+
+                    # determine the color bucket for the template
+                    if percent <= 30:
+                        colorClass = 'light'
+                    elif percent <= 70:
+                        colorClass = 'amber'
+                    else:
+                        colorClass = 'red'
+
+                    periodData.append({
+                        'percent': percent,
+                        'colorClass': colorClass
+                    })
+
+                    # add to totals for averages later
+                    roomTotals[room.id] += percent
+                    periodTotals[period] += percent
+
+                heatmapData.append({
+                    'room': room,
+                    'periods': periodData
+                })
+
+            # figure out the summary stats (taking the first one we find if there's a tie to avoid clutter)
+            mostUtilisedRoomId = max(roomTotals, key=roomTotals.get)
+            leastUtilisedRoomId = min(roomTotals, key=roomTotals.get)
+            peakPeriod = max(periodTotals, key=periodTotals.get)
+
+            # average percentage across all 6 periods
+            mostUtilisedRoom = Room.objects.get(id=mostUtilisedRoomId)
+            mostUtilisedAvg = int(roomTotals[mostUtilisedRoomId] / 6)
+
+            leastUtilisedRoom = Room.objects.get(id=leastUtilisedRoomId)
+            leastUtilisedAvg = int(roomTotals[leastUtilisedRoomId] / 6)
+
+            # average percentage across all rooms for this period
+            numRooms = rooms.count()
+            peakPeriodAvg = int(periodTotals[peakPeriod] / numRooms) if numRooms > 0 else 0
+
+            context.update({
+                'heatmapData': heatmapData,
+                'periods': periods,
+                'mostUtilised': f'{mostUtilisedRoom.roomName} ({mostUtilisedAvg}%)',
+                'leastUtilised': f'{leastUtilisedRoom.roomName} ({leastUtilisedAvg}%)',
+                'peakPeriod': f'P{peakPeriod} ({peakPeriodAvg}%)'
+            })
+
+        except ValueError:
+            messages.error(request, 'Invalid date format')
+
+    return render(request, 'heatmap.html', context)
+
 # handles resetting a teacher's password manually or generating a secure one
 def resetPassword(request):
     if not request.user.is_authenticated or not request.user.is_staff:
