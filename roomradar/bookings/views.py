@@ -391,17 +391,17 @@ def roomHeatmap(request):
 
     if context['hasSearched']:
         try:
-            # parse the string dates into proper date objects so we can do math on them
+            # parse the string dates into proper date objects so it can do calculations
             startDate = datetime.strptime(startDateStr, '%Y-%m-%d').date()
             endDate = datetime.strptime(endDateStr, '%Y-%m-%d').date()
 
-            # make sure start is before end to prevent weird negative weekday counts
+            # make sure start is before end to prevent negative weekday counts
             if startDate > endDate:
                 messages.error(request, 'Start date must be before end date')
                 return render(request, 'heatmap.html', context)
 
             # count total weekdays between the dates (monday=0, sunday=6)
-            # we need this to figure out the percentage out of total possible booking days
+            # needed to figure out the percentage out of total possible booking days
             totalWeekdays = 0
             currentDate = startDate
             while currentDate <= endDate:
@@ -427,7 +427,7 @@ def roomHeatmap(request):
             rooms = Room.objects.all().order_by('roomName')
             periods = list(range(1, 7))
 
-            # dictionaries to track our totals for the summary cards
+            # dictionaries to track totals for the summary cards
             roomTotals = {r.id: 0 for r in rooms}
             periodTotals = {p: 0 for p in periods}
 
@@ -443,7 +443,7 @@ def roomHeatmap(request):
                     # calc percentage and round to whole number
                     percent = int((count / totalWeekdays) * 100)
 
-                    # determine the color bucket for the template
+                    # determine the colour bucket for the template
                     if percent <= 30:
                         colorClass = 'light'
                     elif percent <= 70:
@@ -465,7 +465,7 @@ def roomHeatmap(request):
                     'periods': periodData
                 })
 
-            # figure out the summary stats (taking the first one we find if there's a tie to avoid clutter)
+            # figure out the summary stats (taking the first one found if there's a tie to avoid clutter)
             mostUtilisedRoomId = max(roomTotals, key=roomTotals.get)
             leastUtilisedRoomId = min(roomTotals, key=roomTotals.get)
             peakPeriod = max(periodTotals, key=periodTotals.get)
